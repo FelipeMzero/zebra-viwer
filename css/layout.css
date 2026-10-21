@@ -70,7 +70,7 @@
 /* Main Workspace Split Layout */
 .workspace {
   display: grid;
-  grid-template-columns: 240px minmax(260px, 1fr) minmax(280px, 1.25fr);
+  grid-template-columns: 260px minmax(260px, 1fr) minmax(300px, 1.2fr);
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -84,6 +84,8 @@
   border-right: 1px solid var(--border-subtle);
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 .sidebar-section {

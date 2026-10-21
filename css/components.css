@@ -232,6 +232,8 @@
   flex-direction: column;
   gap: 4px;
   margin-bottom: 8px;
+  min-width: 0;
+  width: 100%;
 }
 
 .form-group:last-child {
@@ -240,14 +242,19 @@
 
 .form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 6px;
+  width: 100%;
+  min-width: 0;
 }
 
 .form-label {
-  font-size: 11.5px;
+  font-size: 11px;
   color: var(--text-secondary);
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .form-control {
@@ -260,6 +267,14 @@
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+select.form-control {
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .form-control:focus {
@@ -269,13 +284,16 @@
 
 .checkbox-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
-  font-size: 11.5px;
+  font-size: 11px;
+  line-height: 1.35;
   color: var(--text-secondary);
   cursor: pointer;
   margin-top: 4px;
   user-select: none;
+  width: 100%;
+  min-width: 0;
 }
 
 .checkbox-row input[type="checkbox"] {
@@ -283,6 +301,14 @@
   width: 14px;
   height: 14px;
   cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.checkbox-row span {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
 }
 
 /* Template Cards */
@@ -290,6 +316,8 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  width: 100%;
+  min-width: 0;
 }
 
 .template-card {
@@ -304,6 +332,9 @@
   transition: all 0.15s ease;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .template-card:hover {
@@ -315,6 +346,7 @@
 .template-card.active {
   border-color: var(--accent-primary);
   background-color: var(--accent-primary-soft);
+  border-left: 3px solid var(--accent-primary);
 }
 
 .template-card-header {
@@ -322,19 +354,33 @@
   align-items: center;
   justify-content: space-between;
   gap: 6px;
+  min-width: 0;
+  width: 100%;
 }
 
 .template-card-title {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-primary);
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.template-card-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .template-card-title .icon {
   color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
 .template-card.active .template-card-title .icon {
@@ -349,6 +395,7 @@
   text-transform: uppercase;
   font-family: var(--font-mono);
   letter-spacing: 0.02em;
+  flex-shrink: 0;
 }
 
 .template-badge.zpl {
@@ -383,6 +430,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 6px;
+  min-width: 0;
+  width: 100%;
 }
 
 .template-card-size {
@@ -391,6 +440,7 @@
   gap: 4px;
   font-weight: 600;
   color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
 .template-card-path {
@@ -400,14 +450,16 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 120px;
+  max-width: 110px;
 }
 
 /* Quick Snippets Grid */
 .snippet-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 5px;
+  width: 100%;
+  min-width: 0;
 }
 
 .snippet-btn {
@@ -423,6 +475,10 @@
   gap: 1px;
   transition: all 0.15s ease;
   box-shadow: var(--shadow-sm);
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .snippet-btn:hover {
@@ -437,6 +493,16 @@
   gap: 4px;
   font-weight: 600;
   color: var(--text-primary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.snippet-label-row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .snippet-cmd {
@@ -444,6 +510,9 @@
   font-size: 10px;
   font-weight: 600;
   color: var(--accent-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Code Editor */
