@@ -209,21 +209,243 @@
   gap: 5px;
 }
 
+.lang-tab-short {
+  display: none;
+}
+
+/* Navegação Mobile / Tablet (<= 960px) */
+.mobile-nav {
+  display: none;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 4px 12px;
+  gap: 8px;
+  justify-content: space-around;
+  flex-shrink: 0;
+  z-index: 8;
+}
+
+.mobile-nav-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background-color: transparent;
+  transition: all 0.15s ease;
+}
+
+.mobile-nav-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+}
+
+.mobile-nav-btn.active {
+  color: var(--accent-primary);
+  background-color: var(--bg-primary);
+  box-shadow: var(--shadow-sm);
+  font-weight: 700;
+}
+
 @media (max-width: 1220px) {
   .workspace {
-    grid-template-columns: 245px minmax(300px, 0.9fr) minmax(420px, 1.2fr);
+    grid-template-columns: 245px minmax(300px, 0.95fr) minmax(400px, 1.2fr);
   }
 }
 
 @media (max-width: 960px) {
-  .workspace {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr 1fr;
-    overflow-y: auto;
+  .mobile-nav {
+    display: flex;
   }
-  .sidebar-panel {
-    max-height: 240px;
+
+  .workspace {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* Em telas menores que 960px, exibe o painel ativo em 100% de altura */
+  .workspace .sidebar-panel,
+  .workspace .editor-panel,
+  .workspace .preview-panel {
+    display: none;
+    flex: 1;
+    height: 100%;
+    min-height: 0;
     border-right: none;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: none;
+  }
+
+  .workspace[data-active-view="sidebar"] .sidebar-panel {
+    display: flex;
+  }
+
+  .workspace[data-active-view="editor"] .editor-panel {
+    display: flex;
+  }
+
+  .workspace[data-active-view="preview"] .preview-panel {
+    display: flex;
+  }
+
+  .brand-subtitle {
+    display: none;
+  }
+
+  .lang-tab-text {
+    display: none;
+  }
+
+  .lang-tab-short {
+    display: inline;
+  }
+
+  .app-header {
+    padding: 6px 12px;
+    min-height: 52px;
+    gap: 10px;
+  }
+
+  .preview-viewport {
+    padding: 20px 16px 64px 16px;
+  }
+}
+
+@media (max-width: 720px) {
+  .header-controls .btn-label {
+    display: none;
+  }
+
+  .header-controls .btn {
+    padding: 0 8px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .panel-toolbar {
+    padding: 6px 10px;
+  }
+
+  .panel-toolbar-title strong {
+    font-size: 12.5px;
+  }
+
+  .preview-toolbar-controls {
+    gap: 4px;
+  }
+
+  .toolbar-group .btn-label {
+    display: none;
+  }
+
+  .toolbar-group .btn {
+    padding: 0 6px;
+  }
+
+  .zoom-control-group .btn-label {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-title {
+    font-size: 14px;
+  }
+
+  .brand-title .template-badge {
+    display: none;
+  }
+
+  .lang-tab {
+    padding: 4px 8px;
+    font-size: 11.5px;
+  }
+
+  .status-group:last-child {
+    display: none;
+  }
+}
+
+/* Regras de Impressão Direta (Ctrl+P / Menu Imprimir do Navegador) */
+@media print {
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  html,
+  body {
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  .app-header,
+  .mobile-nav,
+  .sidebar-panel,
+  .editor-panel,
+  .panel-toolbar,
+  .inspector-floating,
+  .status-bar,
+  .diagnostics-bar,
+  .modal-backdrop {
+    display: none !important;
+  }
+
+  .app-shell,
+  .workspace,
+  .preview-panel,
+  .preview-viewport {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: none !important;
+    background: #ffffff !important;
+  }
+
+  .canvas-stage-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transform: none !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
+  .canvas-paper-frame {
+    display: block !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
+  #labelCanvas {
+    display: block !important;
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid;
+  }
+
+  @page {
+    margin: 0;
+    size: auto;
   }
 }

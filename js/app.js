@@ -59,7 +59,9 @@
     statusLang: document.getElementById('statusLang'),
     statusDimensions: document.getElementById('statusDimensions'),
     statusElements: document.getElementById('statusElements'),
-    statusCursor: document.getElementById('statusCursor')
+    statusCursor: document.getElementById('statusCursor'),
+    workspace: document.querySelector('.workspace'),
+    mobileNavBtns: document.querySelectorAll('.mobile-nav-btn')
   };
 
   function getRegistry(lang) {
@@ -107,6 +109,11 @@
 
     renderSidebarTemplates();
     renderSidebarSnippets();
+
+    if (window.innerWidth <= 960 && els.workspace) {
+      els.workspace.setAttribute('data-active-view', 'preview');
+      els.mobileNavBtns.forEach((b) => b.classList.toggle('active', b.dataset.target === 'preview'));
+    }
 
     if (loadDefaultTemplate) {
       const registry = getRegistry(lang);
@@ -406,6 +413,35 @@
    * Bind Event Listeners
    */
   function initEvents() {
+    // Mobile View Switcher (<= 960px)
+    if (els.workspace) {
+      els.workspace.setAttribute('data-active-view', 'preview');
+    }
+    els.mobileNavBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.target;
+        els.mobileNavBtns.forEach((b) => b.classList.toggle('active', b === btn));
+        if (els.workspace) {
+          els.workspace.setAttribute('data-active-view', target);
+        }
+        if (target === 'preview') {
+          requestAnimationFrame(() => fitCanvasToViewport());
+        }
+      });
+    });
+
+    // Auto-fit canvas on window resize or viewport container resize
+    window.addEventListener('resize', () => {
+      fitCanvasToViewport();
+    });
+
+    if (window.ResizeObserver && els.previewViewport) {
+      const ro = new ResizeObserver(() => {
+        fitCanvasToViewport();
+      });
+      ro.observe(els.previewViewport);
+    }
+
     // Language switcher tabs
     els.langTabs.forEach((tab) => {
       tab.addEventListener('click', () => {
@@ -517,28 +553,68 @@
       parseAndRender();
     });
 
-    // Print Label
+    // Print Label (via hidden iframe with fallback to window.open)
     els.printLabelBtn.addEventListener('click', () => {
       const dataUrl = els.labelCanvas.toDataURL('image/png');
-      const win = window.open('', '_blank', 'width=800,height=600');
-      if (!win) return;
-      win.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Imprimir Etiqueta (${state.widthMm}x${state.heightMm}mm)</title>
-          <style>
-            @page { size: ${state.widthMm}mm ${state.heightMm}mm; margin: 0; }
-            body { margin: 0; display: flex; justify-content: center; align-items: center; }
-            img { width: ${state.widthMm}mm; height: ${state.heightMm}mm; object-fit: contain; }
-          </style>
-        </head>
-        <body>
-          <img src="${dataUrl}" onload="window.print();window.close();" />
-        </body>
-        </html>
-      `);
-      win.document.close();
+      const wMm = state.widthMm;
+      const hMm = state.heightMm;
+
+      try {
+        let printFrame = document.getElementById('printFrame');
+        if (!printFrame) {
+          printFrame = document.createElement('iframe');
+          printFrame.id = 'printFrame';
+          printFrame.style.position = 'fixed';
+          printFrame.style.right = '0';
+          printFrame.style.bottom = '0';
+          printFrame.style.width = '0';
+          printFrame.style.height = '0';
+          printFrame.style.border = '0';
+          document.body.appendChild(printFrame);
+        }
+
+        const doc = printFrame.contentWindow.document;
+        doc.open();
+        doc.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Imprimir — ${state.language.toUpperCase()} (${wMm}x${hMm}mm)</title>
+            <style>
+              @page { size: ${wMm}mm ${hMm}mm; margin: 0; }
+              html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #fff; }
+              body { display: flex; justify-content: center; align-items: center; }
+              img { width: ${wMm}mm; max-height: ${hMm}mm; object-fit: contain; }
+            </style>
+          </head>
+          <body>
+            <img src="${dataUrl}" onload="setTimeout(() => { try { window.focus(); window.print(); } catch(e){} }, 80);" />
+          </body>
+          </html>
+        `);
+        doc.close();
+      } catch (err) {
+        // Fallback popup if iframe is restricted
+        const win = window.open('', '_blank', 'width=800,height=600');
+        if (!win) return;
+        win.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Imprimir — ${state.language.toUpperCase()} (${wMm}x${hMm}mm)</title>
+            <style>
+              @page { size: ${wMm}mm ${hMm}mm; margin: 0; }
+              body { margin: 0; display: flex; justify-content: center; align-items: center; }
+              img { width: ${wMm}mm; height: ${hMm}mm; object-fit: contain; }
+            </style>
+          </head>
+          <body>
+            <img src="${dataUrl}" onload="window.print();window.close();" />
+          </body>
+          </html>
+        `);
+        win.document.close();
+      }
     });
 
     // Download source file (.zpl, .epl or .pos)

@@ -40,45 +40,74 @@
       <!-- Seletor de Linguagem (ZPL / EPL / ESC-POS) -->
       <div class="header-controls">
         <div class="lang-switcher" role="tablist" aria-label="Linguagem da Impressora">
-          <button type="button" class="lang-tab active" data-lang="zpl" role="tab">
+          <button type="button" class="lang-tab active" data-lang="zpl" role="tab" title="ZPL II (Zebra)">
             <span class="lang-dot"></span>
-            ZPL II (Zebra)
+            <span class="lang-tab-text">ZPL II (Zebra)</span>
+            <span class="lang-tab-short">ZPL</span>
           </button>
-          <button type="button" class="lang-tab" data-lang="epl" role="tab">
+          <button type="button" class="lang-tab" data-lang="epl" role="tab" title="EPL2 (Eltron)">
             <span class="lang-dot"></span>
-            EPL2 (Eltron)
+            <span class="lang-tab-text">EPL2 (Eltron)</span>
+            <span class="lang-tab-short">EPL</span>
           </button>
-          <button type="button" class="lang-tab" data-lang="escpos" role="tab">
+          <button type="button" class="lang-tab" data-lang="escpos" role="tab" title="ESC/POS (Fiscal)">
             <span class="lang-dot"></span>
-            ESC/POS (Fiscal)
+            <span class="lang-tab-text">ESC/POS (Fiscal)</span>
+            <span class="lang-tab-short">Fiscal</span>
           </button>
         </div>
 
-        <button type="button" id="openRefModalBtn" class="btn btn-ghost">
+        <button type="button" id="openRefModalBtn" class="btn btn-ghost" title="Guia de Comandos">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
           </svg>
-          <span>Guia de Comandos</span>
+          <span class="btn-label">Guia de Comandos</span>
         </button>
-        <button type="button" id="uploadFileBtn" class="btn btn-secondary">
+        <button type="button" id="uploadFileBtn" class="btn btn-secondary" title="Abrir Arquivo (.zpl / .epl / .pos)">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="17 8 12 3 7 8"/>
             <line x1="12" y1="3" x2="12" y2="15"/>
           </svg>
-          <span>Abrir Arquivo (.zpl / .epl / .pos)</span>
+          <span class="btn-label">Abrir Arquivo</span>
         </button>
         <input type="file" id="fileInput" accept=".zpl,.epl,.pos,.prn,.txt" hidden />
-        <button type="button" id="exportPngBtn" class="btn btn-primary">
+        <button type="button" id="exportPngBtn" class="btn btn-primary" title="Baixar PNG">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/>
             <line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
-          <span>Baixar PNG</span>
+          <span class="btn-label">Baixar PNG</span>
         </button>
       </div>
     </header>
+
+    <!-- Navegação Responsiva Mobile / Tablet (<= 960px) -->
+    <nav id="mobileNav" class="mobile-nav" aria-label="Navegação de Telas">
+      <button type="button" class="mobile-nav-btn" data-target="sidebar">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="4" x2="4" y1="21" y2="14"/>
+          <line x1="12" x2="12" y1="21" y2="12"/>
+          <line x1="20" x2="20" y1="21" y2="16"/>
+        </svg>
+        <span>Modelos</span>
+      </button>
+      <button type="button" class="mobile-nav-btn" data-target="editor">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="16 18 22 12 16 6"/>
+          <polyline points="8 6 2 12 8 18"/>
+        </svg>
+        <span>Editor</span>
+      </button>
+      <button type="button" class="mobile-nav-btn active" data-target="preview">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        <span>Visualização</span>
+      </button>
+    </nav>
 
     <!-- Área Principal Dividida -->
     <main class="workspace">
@@ -181,7 +210,7 @@
                 <polyline points="17 21 17 13 7 13 7 21"/>
                 <polyline points="7 3 7 8 15 8"/>
               </svg>
-              <span>Salvar Código</span>
+              <span class="btn-label">Salvar</span>
             </button>
             <button type="button" id="clearCodeBtn" class="btn btn-ghost btn-sm" title="Criar etiqueta limpa">
               <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -190,7 +219,7 @@
                 <line x1="12" y1="18" x2="12" y2="12"/>
                 <line x1="9" y1="15" x2="15" y2="15"/>
               </svg>
-              <span>Nova Etiqueta</span>
+              <span class="btn-label">Novo</span>
             </button>
           </div>
         </div>
@@ -241,7 +270,7 @@
                   <path d="M9 3v18"/>
                   <path d="M15 3v18"/>
                 </svg>
-                <span>Grade (mm)</span>
+                <span class="btn-label">Grade</span>
               </button>
 
               <button type="button" id="rotateBtn" class="btn btn-ghost btn-sm" title="Girar visualização em 90°">
@@ -249,7 +278,7 @@
                   <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
                   <path d="M21 3v5h-5"/>
                 </svg>
-                <span>Girar 90°</span>
+                <span class="btn-label">Girar</span>
               </button>
             </div>
 
@@ -274,7 +303,7 @@
                   <path d="M3 16v3a2 2 0 0 0 2 2h3"/>
                   <path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
                 </svg>
-                <span>Ajustar</span>
+                <span class="btn-label">Ajustar</span>
               </button>
             </div>
 
@@ -284,7 +313,7 @@
                 <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
                 <rect width="12" height="8" x="6" y="14"/>
               </svg>
-              <span>Imprimir</span>
+              <span class="btn-label">Imprimir</span>
             </button>
           </div>
         </div>
