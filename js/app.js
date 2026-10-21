@@ -67,23 +67,33 @@
   function getRegistry(lang) {
     if (lang === 'epl') return window.EPLTemplates;
     if (lang === 'escpos') return window.ESCPOSTemplates;
+    if (lang === 'tspl') return window.TSPLTemplates;
+    if (lang === 'cpcl') return window.CPCLTemplates;
     return window.ZPLTemplates;
   }
 
   function getLangBadgeText(lang) {
     if (lang === 'epl') return 'EPL2 (.epl)';
     if (lang === 'escpos') return 'ESC/POS (.pos)';
+    if (lang === 'tspl') return 'TSPL (.tspl)';
+    if (lang === 'cpcl') return 'CPCL (.cpcl)';
     return 'ZPL II (.zpl)';
   }
 
   /**
-   * Auto-detect whether pasted/typed code is ZPL, EPL, or ESC/POS
+   * Auto-detect whether pasted/typed code is ZPL, EPL, ESC/POS, TSPL, or CPCL
    */
   function detectLanguage(code) {
     const src = String(code || '').trim();
     if (!src) return state.language;
     if (/\^(XA|FO|FT|FD|GB|BC|BY|PW|LL)/i.test(src)) {
       return 'zpl';
+    }
+    if (/^(SIZE\s+\d+|CLS\b|GAP\s+\d+|DIRECTION\s+\d+|BAR\s+\d+|BOX\s+\d+.*PRINT)/im.test(src)) {
+      return 'tspl';
+    }
+    if (/^(!\s*\d+|PAGE-WIDTH|BARCODE-TEXT)/im.test(src)) {
+      return 'cpcl';
     }
     if (/^(ESC\s+[@aEMd\-!]|GS\s+[!BVhwHk]|WIDTH\s+\d+|<LR>|BARCODE\s+|QRCODE\s+)/im.test(src) || /\\x1[bBdD]/.test(src)) {
       return 'escpos';
@@ -95,7 +105,7 @@
   }
 
   /**
-   * Switch active language ('zpl' | 'epl' | 'escpos')
+   * Switch active language ('zpl' | 'epl' | 'escpos' | 'tspl' | 'cpcl')
    */
   function setLanguage(lang, loadDefaultTemplate = false) {
     state.language = lang;
@@ -105,7 +115,7 @@
 
     els.editorLangBadge.textContent = getLangBadgeText(lang);
     els.editorLangBadge.className = `template-badge ${lang}`;
-    els.statusLang.textContent = `Linguagem: ${lang === 'escpos' ? 'ESC/POS' : lang.toUpperCase()}`;
+    els.statusLang.textContent = `Linguagem: ${lang.toUpperCase()}`;
 
     renderSidebarTemplates();
     renderSidebarSnippets();
@@ -117,7 +127,7 @@
 
     if (loadDefaultTemplate) {
       const registry = getRegistry(lang);
-      if (registry && registry.list.length > 0) {
+      if (registry && registry.list && registry.list.length > 0) {
         selectTemplate(registry.list[0]);
       }
     } else {
@@ -132,7 +142,10 @@
     const registry = getRegistry(state.language);
     els.templateList.innerHTML = '';
 
+    if (!registry || !registry.list) return;
+
     registry.list.forEach((tpl) => {
+      const fileName = (tpl.filePath || '').split('/').pop();
       const card = document.createElement('button');
       card.type = 'button';
       card.className = `template-card ${state.activeTemplateId === tpl.id ? 'active' : ''}`;
@@ -150,8 +163,8 @@
           <span class="template-badge ${tpl.language}">${tpl.language === 'escpos' ? 'ESC/POS' : tpl.language.toUpperCase()}</span>
         </div>
         <div class="template-card-meta">
-          <span>${tpl.sizeMm}</span>
-          <span class="template-card-path">${tpl.filePath}</span>
+          <span class="template-card-size">${tpl.sizeMm}</span>
+          <span class="template-card-path" title="${tpl.filePath}">${fileName}</span>
         </div>
       `;
       card.addEventListener('click', () => selectTemplate(tpl));
@@ -267,6 +280,10 @@
       parsed = window.ZPLParser.parse(code);
     } else if (state.language === 'escpos') {
       parsed = window.ESCPOSParser.parse(code);
+    } else if (state.language === 'tspl') {
+      parsed = window.TSPLParser.parse(code);
+    } else if (state.language === 'cpcl') {
+      parsed = window.CPCLParser.parse(code);
     } else {
       parsed = window.EPLParser.parse(code);
     }
@@ -320,6 +337,14 @@
   function applyViewportTransform() {
     els.zoomLabel.textContent = `${Math.round(state.zoom * 100)}%`;
     els.canvasStageWrapper.style.transform = `scale(${state.zoom}) rotate(${state.rotation}deg)`;
+
+    const cw = els.labelCanvas.width || 800;
+    const ch = els.labelCanvas.height || 600;
+    const isRotated = state.rotation === 90 || state.rotation === 270;
+    const visualW = Math.round((isRotated ? ch : cw) * state.zoom);
+    const visualH = Math.round((isRotated ? cw : ch) * state.zoom);
+    els.canvasStageWrapper.style.width = `${visualW}px`;
+    els.canvasStageWrapper.style.height = `${visualH}px`;
   }
 
   function fitCanvasToViewport() {
@@ -617,9 +642,10 @@
       }
     });
 
-    // Download source file (.zpl, .epl or .pos)
+    // Download source file (.zpl, .epl, .pos, .tspl, .cpcl)
     els.downloadCodeBtn.addEventListener('click', () => {
-      const ext = state.language === 'escpos' ? 'pos' : state.language;
+      let ext = state.language;
+      if (state.language === 'escpos') ext = 'pos';
       const blob = new Blob([els.codeEditor.value], { type: 'text/plain;charset=utf-8' });
       const link = document.createElement('a');
       link.download = `template.${ext}`;
@@ -628,7 +654,7 @@
       URL.revokeObjectURL(link.href);
     });
 
-    // Upload file (.zpl, .epl, .pos, .prn, .txt)
+    // Upload file (.zpl, .epl, .pos, .tspl, .cpcl, .prn, .txt)
     els.uploadFileBtn.addEventListener('click', () => els.fileInput.click());
     els.fileInput.addEventListener('change', (e) => {
       const file = e.target.files && e.target.files[0];
@@ -651,6 +677,10 @@
         els.codeEditor.value = `^XA\n^PW${state.widthMm * state.dpmm}\n^LL${state.heightMm * state.dpmm}\n^FO40,40^A0N,36,36^FDNOVA ETIQUETA ZPL^FS\n^XZ`;
       } else if (state.language === 'escpos') {
         els.codeEditor.value = `ESC @\nWIDTH 80\nESC a 1\nESC E 1\nGS ! 17\nNOVO CUPOM FISCAL\nGS ! 0\nESC E 0\n------------------------------------------------\nESC a 0\n<LR>01 PRODUTO EXEMPLO|R$ 10,00\n------------------------------------------------\nESC a 1\nQRCODE 5 "https://www.nfce.fazenda.sp.gov.br"\nGS V 66`;
+      } else if (state.language === 'tspl') {
+        els.codeEditor.value = `SIZE ${state.widthMm} mm, ${state.heightMm} mm\nGAP 3 mm, 0 mm\nDIRECTION 1\nCLS\nTEXT 40,40,"3",0,1,1,"NOVA ETIQUETA TSPL"\nPRINT 1,1`;
+      } else if (state.language === 'cpcl') {
+        els.codeEditor.value = `! 0 200 200 ${state.heightMm * state.dpmm} 1\nPAGE-WIDTH ${state.widthMm * state.dpmm}\nTEXT 4 0 30 40 NOVA ETIQUETA CPCL\nPRINT`;
       } else {
         els.codeEditor.value = `N\nq${state.widthMm * state.dpmm}\nQ${state.heightMm * state.dpmm},24\nA40,40,0,4,1,1,N,"NOVA ETIQUETA EPL"\nP1`;
       }

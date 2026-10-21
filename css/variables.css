@@ -16,6 +16,10 @@
   --accent-epl-soft: rgba(5, 150, 105, 0.10);
   --accent-escpos: #7c3aed;
   --accent-escpos-soft: rgba(124, 58, 237, 0.10);
+  --accent-tspl: #0891b2;
+  --accent-tspl-soft: rgba(8, 145, 178, 0.10);
+  --accent-cpcl: #6366f1;
+  --accent-cpcl-soft: rgba(99, 102, 241, 0.10);
 
   /* Text */
   --text-primary: #0f172a;

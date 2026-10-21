@@ -43,6 +43,16 @@
   box-shadow: var(--shadow-sm), inset 0 0 0 1px rgba(124, 58, 237, 0.28);
 }
 
+.lang-tab.active[data-lang="tspl"] {
+  color: var(--accent-tspl);
+  box-shadow: var(--shadow-sm), inset 0 0 0 1px rgba(8, 145, 178, 0.28);
+}
+
+.lang-tab.active[data-lang="cpcl"] {
+  color: var(--accent-cpcl);
+  box-shadow: var(--shadow-sm), inset 0 0 0 1px rgba(99, 102, 241, 0.28);
+}
+
 .lang-dot {
   width: 8px;
   height: 8px;
@@ -59,6 +69,14 @@
 
 .lang-tab[data-lang="escpos"] .lang-dot {
   background-color: var(--accent-escpos);
+}
+
+.lang-tab[data-lang="tspl"] .lang-dot {
+  background-color: var(--accent-tspl);
+}
+
+.lang-tab[data-lang="cpcl"] .lang-dot {
+  background-color: var(--accent-cpcl);
 }
 
 /* Buttons */
@@ -348,18 +366,41 @@
   color: var(--accent-escpos);
 }
 
+.template-badge.tspl {
+  background-color: var(--accent-tspl-soft);
+  color: var(--accent-tspl);
+}
+
+.template-badge.cpcl {
+  background-color: var(--accent-cpcl-soft);
+  color: var(--accent-cpcl);
+}
+
 .template-card-meta {
   font-size: 11px;
   color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 6px;
+}
+
+.template-card-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  color: var(--text-secondary);
 }
 
 .template-card-path {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 9.5px;
   color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
 }
 
 /* Quick Snippets Grid */

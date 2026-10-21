@@ -50,10 +50,20 @@
             <span class="lang-tab-text">EPL2 (Eltron)</span>
             <span class="lang-tab-short">EPL</span>
           </button>
+          <button type="button" class="lang-tab" data-lang="tspl" role="tab" title="TSPL (Elgin / TSC)">
+            <span class="lang-dot"></span>
+            <span class="lang-tab-text">TSPL (Elgin/TSC)</span>
+            <span class="lang-tab-short">TSPL</span>
+          </button>
           <button type="button" class="lang-tab" data-lang="escpos" role="tab" title="ESC/POS (Fiscal)">
             <span class="lang-dot"></span>
             <span class="lang-tab-text">ESC/POS (Fiscal)</span>
             <span class="lang-tab-short">Fiscal</span>
+          </button>
+          <button type="button" class="lang-tab" data-lang="cpcl" role="tab" title="CPCL (Zebra Mobile)">
+            <span class="lang-dot"></span>
+            <span class="lang-tab-text">CPCL (Mobile)</span>
+            <span class="lang-tab-short">CPCL</span>
           </button>
         </div>
 
@@ -467,6 +477,41 @@
             </tbody>
           </table>
         </div>
+        <div>
+          <h4 style="color: var(--accent-tspl); margin-bottom: 6px;">TSPL / TSPL2 (Elgin / TSC)</h4>
+          <table class="ref-table">
+            <thead>
+              <tr><th>Comando</th><th>Descrição</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>SIZE 100 mm, 50 mm</code></td><td>Dimensões da etiqueta (largura, altura)</td></tr>
+              <tr><td><code>GAP 3 mm, 0 mm</code></td><td>Espaçamento entre etiquetas (gap)</td></tr>
+              <tr><td><code>CLS</code> / <code>PRINT 1,1</code></td><td>Limpa buffer / Imprime etiqueta</td></tr>
+              <tr><td><code>TEXT x,y,"3",0,1,1,"txt"</code></td><td>Texto com fonte (1 a 5, "0"=escalável)</td></tr>
+              <tr><td><code>BARCODE x,y,"128",h,1,0,2,2,"cod"</code></td><td>Código de barras 1D (Code 128, EAN13, 39)</td></tr>
+              <tr><td><code>QRCODE x,y,L,5,A,0,"txt"</code></td><td>QR Code 2D TSPL</td></tr>
+              <tr><td><code>BOX x1,y1,x2,y2,esp</code></td><td>Desenha moldura/caixa gráfica</td></tr>
+              <tr><td><code>BAR x,y,w,h</code></td><td>Desenha barra preta sólida/divisória</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <h4 style="color: var(--accent-cpcl); margin-bottom: 6px;">CPCL (Zebra Mobile)</h4>
+          <table class="ref-table">
+            <thead>
+              <tr><th>Comando</th><th>Descrição</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>! 0 200 200 &lt;alt&gt; 1</code></td><td>Cabeçalho CPCL (resolução e altura)</td></tr>
+              <tr><td><code>PAGE-WIDTH 576</code></td><td>Largura da área de impressão em dots</td></tr>
+              <tr><td><code>TEXT &lt;f&gt; &lt;tam&gt; x y dados</code></td><td>Texto CPCL (fontes 0 a 7)</td></tr>
+              <tr><td><code>BARCODE 128 2 1 70 x y cod</code></td><td>Código de barras 1D</td></tr>
+              <tr><td><code>LINE x0 y0 x1 y1 esp</code></td><td>Linha horizontal ou vertical</td></tr>
+              <tr><td><code>BOX x0 y0 x1 y1 esp</code></td><td>Caixa/retângulo gráfico</td></tr>
+              <tr><td><code>PRINT</code></td><td>Comando de impressão e avanço</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -476,10 +521,14 @@
   <script src="js/parsers/eplParser.js"></script>
   <script src="js/parsers/zplParser.js"></script>
   <script src="js/parsers/escposParser.js"></script>
+  <script src="js/parsers/tsplParser.js"></script>
+  <script src="js/parsers/cpclParser.js"></script>
   <script src="js/renderer/canvasRenderer.js"></script>
   <script src="js/templates/eplTemplates.js"></script>
   <script src="js/templates/zplTemplates.js"></script>
   <script src="js/templates/escposTemplates.js"></script>
+  <script src="js/templates/tsplTemplates.js"></script>
+  <script src="js/templates/cpclTemplates.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
