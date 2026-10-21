@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zebra Studio — Visualizador de Templates EPL2 &amp; ZPL II</title>
+  <!-- Fonte Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Estilos separados em css/ -->
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Cabeçalho Superior -->
+    <header class="app-header">
+      <div class="brand-group">
+        <div class="brand-logo" aria-hidden="true">
+          <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 5v14"/>
+            <path d="M8 5v14"/>
+            <path d="M12 5v14"/>
+            <path d="M17 5v14"/>
+            <path d="M21 5v14"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">
+            Zebra Label Studio
+            <span class="template-badge zpl">100% Offline Canvas</span>
+          </div>
+          <div class="brand-subtitle">Visualizador e Interpretador de Etiquetas Térmicas EPL2 &amp; ZPL II</div>
+        </div>
+      </div>
+
+      <!-- Seletor de Linguagem (ZPL / EPL) -->
+      <div class="header-controls">
+        <div class="lang-switcher" role="tablist" aria-label="Linguagem da Impressora">
+          <button type="button" class="lang-tab active" data-lang="zpl" role="tab">
+            <span class="lang-dot"></span>
+            ZPL II (Zebra)
+          </button>
+          <button type="button" class="lang-tab" data-lang="epl" role="tab">
+            <span class="lang-dot"></span>
+            EPL2 (Eltron)
+          </button>
+        </div>
+
+        <button type="button" id="openRefModalBtn" class="btn btn-ghost">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+          </svg>
+          <span>Guia de Comandos</span>
+        </button>
+        <button type="button" id="uploadFileBtn" class="btn btn-secondary">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <span>Abrir Arquivo (.zpl / .epl)</span>
+        </button>
+        <input type="file" id="fileInput" accept=".zpl,.epl,.prn,.txt" hidden />
+        <button type="button" id="exportPngBtn" class="btn btn-primary">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Baixar PNG</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Área Principal Dividida -->
+    <main class="workspace">
+      <!-- Painel Lateral Esquerdo: Modelos e Configuração da Etiqueta -->
+      <aside class="sidebar-panel">
+        <!-- Modelos Prontos (templates/zpl/ e templates/epl/) -->
+        <section class="sidebar-section">
+          <div class="sidebar-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>
+            </svg>
+            <span>Templates da Pasta</span>
+          </div>
+          <div id="templateList" class="template-list"></div>
+        </section>
+
+        <!-- Dimensões e Densidade (DPI) -->
+        <section class="sidebar-section">
+          <div class="sidebar-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="4" x2="4" y1="21" y2="14"/>
+              <line x1="4" x2="4" y1="10" y2="3"/>
+              <line x1="12" x2="12" y1="21" y2="12"/>
+              <line x1="12" x2="12" y1="8" y2="3"/>
+              <line x1="20" x2="20" y1="21" y2="16"/>
+              <line x1="20" x2="20" y1="12" y2="3"/>
+              <line x1="2" x2="6" y1="14" y2="14"/>
+              <line x1="10" x2="14" y1="8" y2="8"/>
+              <line x1="18" x2="22" y1="16" y2="16"/>
+            </svg>
+            <span>Configuração da Etiqueta</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="presetSelect">Tamanho Padrão</label>
+            <select id="presetSelect" class="form-control">
+              <option value="100x50">100 x 50 mm (4" x 2" - Produto)</option>
+              <option value="100x150">100 x 150 mm (4" x 6" - Expedição/DANFE)</option>
+              <option value="60x40">60 x 40 mm (Gôndola / Patrimônio)</option>
+              <option value="50x25">50 x 25 mm (Etiqueta Pequena)</option>
+              <option value="custom">Personalizado</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="widthMmInput">Largura (mm)</label>
+              <input type="number" id="widthMmInput" class="form-control" value="100" min="20" max="300" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="heightMmInput">Altura (mm)</label>
+              <input type="number" id="heightMmInput" class="form-control" value="50" min="15" max="400" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="dpiSelect">Resolução da Cabeça Térmica</label>
+            <select id="dpiSelect" class="form-control">
+              <option value="8" selected>203 DPI (8 dots/mm) — Padrão GC420t / ZD220</option>
+              <option value="12">300 DPI (12 dots/mm) — Alta Definição</option>
+              <option value="24">600 DPI (24 dots/mm) — Micro Etiquetas</option>
+            </select>
+          </div>
+
+          <label class="checkbox-row">
+            <input type="checkbox" id="autoSizeCheck" checked />
+            <span>Ajustar tamanho via código (<code>^PW/^LL</code> ou <code>q/Q</code>)</span>
+          </label>
+        </section>
+
+        <!-- Inserção Rápida de Comandos -->
+        <section class="sidebar-section">
+          <div class="sidebar-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+            <span>Inserir Comando Rápido</span>
+          </div>
+          <div id="snippetGrid" class="snippet-grid"></div>
+        </section>
+      </aside>
+
+      <!-- Painel Central: Editor de Código EPL / ZPL -->
+      <section class="editor-panel">
+        <div class="panel-toolbar">
+          <div class="panel-toolbar-title">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="16 18 22 12 16 6"/>
+              <polyline points="8 6 2 12 8 18"/>
+            </svg>
+            <strong>Editor de Código</strong>
+            <span id="editorLangBadge" class="template-badge zpl">ZPL II (.zpl)</span>
+          </div>
+          <div class="header-controls">
+            <button type="button" id="downloadCodeBtn" class="btn btn-ghost btn-sm" title="Salvar código no computador">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+              <span>Salvar Código</span>
+            </button>
+            <button type="button" id="clearCodeBtn" class="btn btn-ghost btn-sm" title="Criar etiqueta limpa">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="12" y1="18" x2="12" y2="12"/>
+                <line x1="9" y1="15" x2="15" y2="15"/>
+              </svg>
+              <span>Nova Etiqueta</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="editor-container">
+          <div id="lineNumbers" class="line-numbers" aria-hidden="true">
+            <div>1</div>
+          </div>
+          <textarea
+            id="codeEditor"
+            class="code-textarea"
+            spellcheck="false"
+            autocapitalize="off"
+            autocomplete="off"
+            placeholder="Cole seu código ZPL (^XA ... ^XZ) ou EPL (N ... P1) aqui..."
+          ></textarea>
+        </div>
+
+        <!-- Barra de avisos de sintaxe -->
+        <div id="diagnosticsBar" class="diagnostics-bar">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span id="diagnosticsText"></span>
+        </div>
+      </section>
+
+      <!-- Painel Direito: Visualizador Interativo em Canvas -->
+      <section class="preview-panel">
+        <div class="panel-toolbar">
+          <div class="panel-toolbar-title">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <strong>Pré-visualização da Etiqueta</strong>
+          </div>
+
+          <div class="preview-toolbar-controls">
+            <div class="toolbar-group">
+              <button type="button" id="gridToggleBtn" class="btn btn-ghost btn-sm" title="Mostrar grade milimétrica (5mm / 10mm)">
+                <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect width="18" height="18" x="3" y="3" rx="2"/>
+                  <path d="M3 9h18"/>
+                  <path d="M3 15h18"/>
+                  <path d="M9 3v18"/>
+                  <path d="M15 3v18"/>
+                </svg>
+                <span>Grade (mm)</span>
+              </button>
+
+              <button type="button" id="rotateBtn" class="btn btn-ghost btn-sm" title="Girar visualização em 90°">
+                <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+                  <path d="M21 3v5h-5"/>
+                </svg>
+                <span>Girar 90°</span>
+              </button>
+            </div>
+
+            <div class="zoom-control-group" role="group" aria-label="Controles de Zoom">
+              <button type="button" id="zoomOutBtn" class="zoom-btn" title="Diminuir Zoom" aria-label="Diminuir Zoom">
+                <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+              </button>
+              <span id="zoomLabel" class="zoom-value">75%</span>
+              <button type="button" id="zoomInBtn" class="zoom-btn" title="Aumentar Zoom" aria-label="Aumentar Zoom">
+                <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+              </button>
+              <div class="zoom-divider" aria-hidden="true"></div>
+              <button type="button" id="zoomFitBtn" class="zoom-fit-btn" title="Ajustar etiqueta à área visível">
+                <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3"/>
+                  <path d="M21 8V5a2 2 0 0 0-2-2h-3"/>
+                  <path d="M3 16v3a2 2 0 0 0 2 2h3"/>
+                  <path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+                </svg>
+                <span>Ajustar</span>
+              </button>
+            </div>
+
+            <button type="button" id="printLabelBtn" class="btn btn-secondary btn-sm" title="Imprimir etiqueta">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 6 2 18 2 18 9"/>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                <rect width="12" height="8" x="6" y="14"/>
+              </svg>
+              <span>Imprimir</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="previewViewport" class="preview-viewport">
+          <div id="canvasStageWrapper" class="canvas-stage-wrapper">
+            <div class="canvas-paper-frame">
+              <canvas id="labelCanvas" width="800" height="400"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inspetor Interativo de Elementos -->
+        <div id="inspectorBar" class="inspector-floating">
+          <div style="display: flex; align-items: center; gap: 10px; overflow: hidden;">
+            <svg class="icon icon-sm" style="color: var(--accent-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="22" y1="12" x2="18" y2="12"/>
+              <line x1="6" y1="12" x2="2" y2="12"/>
+              <line x1="12" y1="6" x2="12" y2="2"/>
+              <line x1="12" y1="22" x2="12" y2="18"/>
+            </svg>
+            <span id="inspectorCmd" class="inspector-cmd-badge">Inspecionar</span>
+            <span id="inspectorDesc" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); font-family: var(--font-mono);">
+              Passe o mouse ou clique em um elemento da etiqueta para localizar no código
+            </span>
+          </div>
+          <span id="inspectorCoords" class="inspector-coords">X:0 Y:0</span>
+        </div>
+      </section>
+    </main>
+
+    <!-- Barra de Status Inferior -->
+    <footer class="status-bar">
+      <div class="status-group">
+        <span class="status-item">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="4 7 4 4 20 4 20 7"/>
+            <line x1="9" y1="20" x2="15" y2="20"/>
+            <line x1="12" y1="4" x2="12" y2="20"/>
+          </svg>
+          <span id="statusLang">Linguagem: ZPL</span>
+        </span>
+        <span class="status-item">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect width="18" height="18" x="3" y="3" rx="2"/>
+            <path d="M9 3v18"/>
+            <path d="M3 9h6"/>
+            <path d="M3 15h6"/>
+          </svg>
+          <span id="statusDimensions">100x50 mm (800x400 dots @ 8 dpmm)</span>
+        </span>
+        <span class="status-item">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+            <polyline points="2 17 12 22 22 17"/>
+            <polyline points="2 12 12 17 22 12"/>
+          </svg>
+          <span id="statusElements">Elementos: 0</span>
+        </span>
+      </div>
+      <div class="status-group">
+        <span class="status-item">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
+            <path d="m13 13 6 6"/>
+          </svg>
+          <span id="statusCursor">Cursor: X=0d, Y=0d</span>
+        </span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modal de Referência Rápida ZPL & EPL -->
+  <div id="refModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="refModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="refModalTitle" style="display: flex; align-items: center; gap: 8px;">
+          <svg class="icon" style="color: var(--accent-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+          </svg>
+          Guia Rápido de Comandos — ZPL II &amp; EPL2
+        </h3>
+        <button type="button" id="closeRefModalBtn" class="btn btn-ghost btn-sm">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          <span>Fechar</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div>
+          <h4 style="color: var(--accent-zpl); margin-bottom: 6px;">Comandos ZPL II (Zebra)</h4>
+          <table class="ref-table">
+            <thead>
+              <tr><th>Comando</th><th>Descrição</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>^XA ... ^XZ</code></td><td>Início e fim do formato da etiqueta</td></tr>
+              <tr><td><code>^PW800</code> / <code>^LL400</code></td><td>Largura e altura da etiqueta em dots</td></tr>
+              <tr><td><code>^FOx,y</code></td><td>Posição de origem do campo (X, Y)</td></tr>
+              <tr><td><code>^A0N,h,w</code></td><td>Fonte escalável Zebra (altura, largura)</td></tr>
+              <tr><td><code>^FD...^FS</code></td><td>Dados do texto ou código de barras</td></tr>
+              <tr><td><code>^GBw,h,t,c,r</code></td><td>Caixa ou linha gráfica (largura, altura, espessura)</td></tr>
+              <tr><td><code>^FR</code></td><td>Impressão reversa (branco sobre preto)</td></tr>
+              <tr><td><code>^BYw,r,h</code></td><td>Padrão de largura de módulo e altura de barras</td></tr>
+              <tr><td><code>^BCN,h,Y,N</code></td><td>Código de barras Code 128</td></tr>
+              <tr><td><code>^BEN,h,Y,N</code></td><td>Código de barras EAN-13</td></tr>
+              <tr><td><code>^BQN,2,mag</code></td><td>QR Code 2D (ex: <code>^FDQA,texto^FS</code>)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <h4 style="color: var(--accent-epl); margin-bottom: 6px;">Comandos EPL2 (Eltron)</h4>
+          <table class="ref-table">
+            <thead>
+              <tr><th>Comando</th><th>Descrição</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>N</code> / <code>P1</code></td><td>Limpa buffer de imagem / Imprime 1 etiqueta</td></tr>
+              <tr><td><code>q800</code> / <code>Q400,24</code></td><td>Largura (dots) / Altura e gap (dots)</td></tr>
+              <tr><td><code>Ax,y,r,f,hm,vm,N,"txt"</code></td><td>Texto ASCII (fontes 1 a 5, N=normal, R=reverso)</td></tr>
+              <tr><td><code>Bx,y,r,t,n,w,h,B,"cod"</code></td><td>Código de barras 1D (tipo <code>1</code>=128, <code>E30</code>=EAN13, <code>3</code>=Code39)</td></tr>
+              <tr><td><code>bx,y,Q,s,"dados"</code></td><td>QR Code 2D em EPL2</td></tr>
+              <tr><td><code>LOx,y,w,h</code></td><td>Linha ou retângulo preenchido preto</td></tr>
+              <tr><td><code>LWx,y,w,h</code></td><td>Retângulo branco (apaga área)</td></tr>
+              <tr><td><code>LEx,y,w,h</code></td><td>Bloco invertido (XOR)</td></tr>
+              <tr><td><code>Xx1,y1,esp,x2,y2</code></td><td>Desenha caixa/moldura de (x1,y1) até (x2,y2)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts Modulares Separados em js/ -->
+  <script src="js/barcode/barcodeRenderer.js"></script>
+  <script src="js/parsers/eplParser.js"></script>
+  <script src="js/parsers/zplParser.js"></script>
+  <script src="js/renderer/canvasRenderer.js"></script>
+  <script src="js/templates/eplTemplates.js"></script>
+  <script src="js/templates/zplTemplates.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

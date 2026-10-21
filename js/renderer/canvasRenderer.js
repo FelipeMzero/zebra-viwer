@@ -1,0 +1,302 @@
+/**
+ * Zebra Studio - HTML5 Canvas Label Renderer
+ * Renders normalized EPL2 / ZPL II elements with pixel/dot accuracy,
+ * bounding-box calculation for interactive inspection, and grid overlay.
+ */
+(function (global) {
+  'use strict';
+
+  function drawRoundedRectPath(ctx, x, y, w, h, r) {
+    const radius = Math.max(0, Math.min(r, w / 2, h / 2));
+    ctx.beginPath();
+    if (radius === 0) {
+      ctx.rect(x, y, w, h);
+    } else {
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + w - radius, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+      ctx.lineTo(x + w, y + h - radius);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+      ctx.lineTo(x + radius, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+    }
+    ctx.closePath();
+  }
+
+  /**
+   * Wrap text for ZPL ^FB (Field Block)
+   */
+  function wrapTextLines(ctx, rawText, maxWidth, maxLines) {
+    // ZPL uses \& for explicit line breaks inside ^FB
+    const paragraphs = String(rawText || '').split(/\\&|\r?\n/);
+    const lines = [];
+
+    for (const para of paragraphs) {
+      const words = para.split(' ');
+      let current = '';
+      for (let i = 0; i < words.length; i++) {
+        const candidate = current ? current + ' ' + words[i] : words[i];
+        if (ctx.measureText(candidate).width <= maxWidth || !current) {
+          current = candidate;
+        } else {
+          lines.push(current);
+          current = words[i];
+          if (lines.length >= maxLines) break;
+        }
+      }
+      if (lines.length >= maxLines) break;
+      if (current || para === '') lines.push(current);
+    }
+    return lines.slice(0, maxLines);
+  }
+
+  function renderLabel(canvas, parsed, config) {
+    const {
+      widthDots = 800,
+      heightDots = 600,
+      dpmm = 8,
+      showGrid = false,
+      hoveredElement = null,
+      selectedElement = null
+    } = config;
+
+    const w = Math.max(100, Math.round(widthDots));
+    const h = Math.max(100, Math.round(heightDots));
+
+    if (canvas.width !== w) canvas.width = w;
+    if (canvas.height !== h) canvas.height = h;
+
+    const ctx = canvas.getContext('2d');
+    ctx.save();
+
+    // 1. Clean White Thermal Paper Background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, w, h);
+
+    // 2. Render each element in sequence and compute its bounding box
+    const elements = (parsed && parsed.elements) || [];
+
+    for (let i = 0; i < elements.length; i++) {
+      const el = elements[i];
+      ctx.save();
+
+      if (el.type === 'rect') {
+        if (el.reverse) {
+          ctx.globalCompositeOperation = 'difference';
+          ctx.fillStyle = '#ffffff';
+        } else {
+          ctx.fillStyle = el.color === 'W' ? '#ffffff' : '#000000';
+        }
+        const radius = el.rounding ? (el.rounding / 8) * (Math.min(el.width, el.height) / 2) : 0;
+        drawRoundedRectPath(ctx, el.x, el.y, el.width, el.height, radius);
+        ctx.fill();
+        el.bbox = { x: el.x, y: el.y, width: el.width, height: el.height };
+      } else if (el.type === 'box') {
+        const t = Math.min(el.thickness || 2, el.width / 2, el.height / 2);
+        const radius = el.rounding ? (el.rounding / 8) * (Math.min(el.width, el.height) / 2) : 0;
+        if (el.reverse) {
+          ctx.globalCompositeOperation = 'difference';
+          ctx.strokeStyle = '#ffffff';
+        } else {
+          ctx.strokeStyle = el.color === 'W' ? '#ffffff' : '#000000';
+        }
+        ctx.lineWidth = t;
+        drawRoundedRectPath(
+          ctx,
+          el.x + t / 2,
+          el.y + t / 2,
+          Math.max(1, el.width - t),
+          Math.max(1, el.height - t),
+          radius
+        );
+        ctx.stroke();
+        el.bbox = { x: el.x, y: el.y, width: el.width, height: el.height };
+      } else if (el.type === 'circle') {
+        const r = el.diameter / 2;
+        const t = Math.min(el.thickness || 2, r);
+        ctx.beginPath();
+        ctx.arc(el.x + r, el.y + r, Math.max(1, r - t / 2), 0, Math.PI * 2);
+        ctx.lineWidth = t;
+        ctx.strokeStyle = el.color === 'W' ? '#ffffff' : '#000000';
+        ctx.stroke();
+        el.bbox = { x: el.x, y: el.y, width: el.diameter, height: el.diameter };
+      } else if (el.type === 'ellipse') {
+        const rx = el.width / 2;
+        const ry = el.height / 2;
+        const t = Math.min(el.thickness || 2, rx, ry);
+        ctx.beginPath();
+        ctx.ellipse(el.x + rx, el.y + ry, Math.max(1, rx - t / 2), Math.max(1, ry - t / 2), 0, 0, Math.PI * 2);
+        ctx.lineWidth = t;
+        ctx.strokeStyle = el.color === 'W' ? '#ffffff' : '#000000';
+        ctx.stroke();
+        el.bbox = { x: el.x, y: el.y, width: el.width, height: el.height };
+      } else if (el.type === 'line') {
+        ctx.beginPath();
+        ctx.moveTo(el.x, el.y);
+        ctx.lineTo(el.x2, el.y2);
+        ctx.lineWidth = el.thickness || 2;
+        ctx.strokeStyle = '#000000';
+        ctx.stroke();
+        el.bbox = {
+          x: Math.min(el.x, el.x2),
+          y: Math.min(el.y, el.y2),
+          width: Math.max(8, Math.abs(el.x2 - el.x)),
+          height: Math.max(8, Math.abs(el.y2 - el.y))
+        };
+      } else if (el.type === 'gf') {
+        ctx.fillStyle = '#000000';
+        let hexIdx = 0;
+        for (let r = 0; r < el.rows; r++) {
+          for (let b = 0; b < el.bytesPerRow; b++) {
+            const byteVal = parseInt(el.hexData.slice(hexIdx, hexIdx + 2), 16) || 0;
+            hexIdx += 2;
+            for (let bit = 0; bit < 8; bit++) {
+              if ((byteVal >> (7 - bit)) & 1) {
+                ctx.fillRect(el.x + b * 8 + bit, el.y + r, 1, 1);
+              }
+            }
+          }
+        }
+        el.bbox = { x: el.x, y: el.y, width: el.width, height: el.height };
+      } else if (el.type === 'text') {
+        const fH = Math.max(8, el.fontHeight || 24);
+        const fW = Math.max(6, el.fontWidth || fH);
+        const isMono = el.eplStyle || (el.fontId && el.fontId !== '0');
+        const fontFamily = isMono
+          ? '"JetBrains Mono", "Consolas", "Courier New", monospace'
+          : '"Arial Narrow", "Roboto Condensed", "Inter", "Arial", sans-serif';
+
+        ctx.font = `bold ${fH}px ${fontFamily}`;
+        ctx.textBaseline = 'top';
+
+        // Horizontal stretch ratio to emulate Zebra independent width/height scaling
+        const naturalCharW = fH * (isMono ? 0.6 : 0.55);
+        const targetCharW = el.eplStyle ? fW : fW * 0.62;
+        const scaleX = Math.max(0.45, Math.min(3.0, targetCharW / naturalCharW));
+
+        ctx.translate(el.x, el.y);
+        if (el.rotation === 90) ctx.rotate(Math.PI / 2);
+        else if (el.rotation === 180) ctx.rotate(Math.PI);
+        else if (el.rotation === 270) ctx.rotate((3 * Math.PI) / 2);
+
+        const measuredRaw = ctx.measureText(el.text || '').width;
+        const totalW = measuredRaw * scaleX;
+        let totalH = fH;
+
+        if (el.eplStyle && el.reverse) {
+          // EPL Reverse ('R'): black background bar with white text
+          ctx.fillStyle = '#000000';
+          ctx.fillRect(-4, -3, totalW + 8, fH + 6);
+          ctx.fillStyle = '#ffffff';
+        } else if (el.reverse) {
+          // ZPL ^FR: invert pixels against underlying canvas
+          ctx.globalCompositeOperation = 'difference';
+          ctx.fillStyle = '#ffffff';
+        } else {
+          ctx.fillStyle = '#000000';
+        }
+
+        if (el.fb && el.fb.width > 0) {
+          const effWidth = el.fb.width / scaleX;
+          const lines = wrapTextLines(ctx, el.text, effWidth, el.fb.maxLines || 1);
+          const lineStep = fH + (el.fb.lineSpacing || 2);
+          totalH = lines.length * lineStep;
+
+          ctx.scale(scaleX, 1);
+          for (let l = 0; l < lines.length; l++) {
+            const lineStr = lines[l];
+            const lw = ctx.measureText(lineStr).width;
+            let drawX = 0;
+            if (el.fb.align === 'C') drawX = (effWidth - lw) / 2;
+            else if (el.fb.align === 'R') drawX = effWidth - lw;
+            ctx.fillText(lineStr, drawX, l * lineStep);
+          }
+          el.bbox = { x: el.x, y: el.y, width: el.fb.width, height: totalH };
+        } else {
+          ctx.scale(scaleX, 1);
+          ctx.fillText(el.text || '', 0, 0);
+
+          if (el.rotation === 90 || el.rotation === 270) {
+            el.bbox = { x: el.x - totalH, y: el.y, width: totalH, height: totalW };
+          } else {
+            el.bbox = { x: el.x, y: el.y, width: Math.max(20, totalW), height: totalH };
+          }
+        }
+      } else if (el.type === 'barcode') {
+        const dim = global.BarcodeRenderer.draw1DBarcode(ctx, {
+          x: el.x,
+          y: el.y,
+          type: el.barcodeType,
+          data: el.data,
+          moduleWidth: el.moduleWidth,
+          wideRatio: el.wideRatio,
+          height: el.height,
+          showText: el.showText,
+          textAbove: el.textAbove,
+          rotation: el.rotation
+        });
+        el.bbox = { x: el.x, y: el.y, width: dim.width || 120, height: dim.height || el.height };
+      } else if (el.type === 'qrcode') {
+        const dim = global.BarcodeRenderer.drawQRCode(ctx, {
+          x: el.x,
+          y: el.y,
+          data: el.data,
+          magnification: el.magnification
+        });
+        el.bbox = { x: el.x, y: el.y, width: dim.width, height: dim.height };
+      }
+
+      ctx.restore();
+    }
+
+    // 3. Optional Dot / Millimeter Grid Overlay
+    if (showGrid) {
+      ctx.save();
+      const step5mm = dpmm * 5;
+      const step10mm = dpmm * 10;
+
+      for (let x = step5mm; x < w; x += step5mm) {
+        const isMajor = Math.round(x % step10mm) === 0;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.strokeStyle = isMajor ? 'rgba(56, 189, 248, 0.28)' : 'rgba(148, 163, 184, 0.15)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      for (let y = step5mm; y < h; y += step5mm) {
+        const isMajor = Math.round(y % step10mm) === 0;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.strokeStyle = isMajor ? 'rgba(56, 189, 248, 0.28)' : 'rgba(148, 163, 184, 0.15)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 4. Highlight Hovered or Selected Element (Interactive Inspector)
+    const activeTarget = hoveredElement || selectedElement;
+    if (activeTarget && activeTarget.bbox) {
+      const b = activeTarget.bbox;
+      ctx.save();
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.16)';
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 3]);
+      ctx.fillRect(b.x - 3, b.y - 3, b.width + 6, b.height + 6);
+      ctx.strokeRect(b.x - 3, b.y - 3, b.width + 6, b.height + 6);
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
+  global.CanvasRenderer = {
+    render: renderLabel
+  };
+})(window);

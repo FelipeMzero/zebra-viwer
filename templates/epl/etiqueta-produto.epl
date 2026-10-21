@@ -1,0 +1,27 @@
+; Template EPL2 - Etiqueta de Produto / Varejo (100x50mm @ 203dpi)
+N
+q800
+Q400,24
+ZT
+; Moldura externa
+X16,16,3,784,384
+; Cabecalho invertido (fundo preto)
+LO16,16,768,52
+A36,28,0,4,1,1,R,"SUPERMERCADO & ATACADO CENTRAL"
+; Dados do Produto
+A32,86,0,4,1,1,N,"CAFE TORRADO E MOIDO EXTRA 500G"
+A32,122,0,2,1,1,N,"MARCA: FAZENDA NOBRE   |   LOTE: L2026-09B"
+A32,148,0,2,1,1,N,"VAL: 19/10/2027        |   COD INTERNO: 004892"
+; Linha divisoria
+LO32,178,736,2
+; Bloco de Preco em destaque
+X460,196,3,764,364
+LO460,196,304,40
+A480,206,0,3,1,1,R,"PRECO DE VENDA"
+A478,252,0,4,1,1,N,"R$"
+A530,248,0,5,1,2,N,"18,90"
+A480,336,0,1,1,1,N,"R$ 37,80 / KG"
+; Codigo de Barras EAN-13
+A32,198,0,2,1,1,N,"EAN-13:"
+B32,224,0,E30,3,6,105,B,"789123456789"
+P1
