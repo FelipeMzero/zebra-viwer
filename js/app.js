@@ -325,12 +325,12 @@
   function fitCanvasToViewport() {
     const rect = els.previewViewport.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
-    const availW = rect.width - 80;
-    const availH = rect.height - 90;
+    const availW = Math.max(100, rect.width - 36);
+    const availH = Math.max(100, rect.height - 56);
     const cw = els.labelCanvas.width || 800;
     const ch = els.labelCanvas.height || 600;
-    const fitScale = Math.min(availW / cw, availH / ch, 1.25);
-    state.zoom = Math.max(0.25, Math.round(fitScale * 20) / 20);
+    const fitScale = Math.min(availW / cw, availH / ch, 1.2);
+    state.zoom = Math.max(0.15, Math.min(1.5, Math.round(fitScale * 20) / 20));
     applyViewportTransform();
   }
 

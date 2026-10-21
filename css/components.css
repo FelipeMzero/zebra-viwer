@@ -66,11 +66,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  height: 32px;
-  padding: 0 11px;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
   border-radius: var(--radius-sm);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   transition: all 0.15s ease;
   border: 1px solid transparent;
@@ -80,10 +80,10 @@
 }
 
 .btn-sm {
-  height: 30px;
-  padding: 0 9px;
-  font-size: 12px;
-  gap: 5px;
+  height: 26px;
+  padding: 0 8px;
+  font-size: 11.5px;
+  gap: 4px;
 }
 
 .btn-primary {
@@ -127,8 +127,8 @@
 }
 
 .btn-icon {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   padding: 0;
 }
 
@@ -136,26 +136,26 @@
 .toolbar-group {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .zoom-control-group {
   display: inline-flex;
   align-items: center;
-  height: 30px;
+  height: 26px;
   background-color: var(--bg-primary);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 2px;
+  padding: 1px 2px;
   box-shadow: var(--shadow-sm);
 }
 
 .zoom-control-group .zoom-btn {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   padding: 0;
   border: none;
-  border-radius: 4px;
+  border-radius: 3px;
   background: transparent;
   color: var(--text-secondary);
   display: inline-flex;
@@ -170,11 +170,11 @@
 }
 
 .zoom-value {
-  min-width: 42px;
-  padding: 0 4px;
+  min-width: 36px;
+  padding: 0 2px;
   text-align: center;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   user-select: none;
@@ -182,23 +182,23 @@
 
 .zoom-divider {
   width: 1px;
-  height: 16px;
+  height: 14px;
   background-color: var(--border-subtle);
-  margin: 0 2px;
+  margin: 0 1px;
 }
 
 .zoom-control-group .zoom-fit-btn {
-  height: 24px;
-  padding: 0 8px;
+  height: 22px;
+  padding: 0 6px;
   border: none;
-  border-radius: 4px;
+  border-radius: 3px;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   transition: all 0.15s ease;
   white-space: nowrap;
 }
@@ -212,8 +212,8 @@
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  margin-bottom: 10px;
+  gap: 4px;
+  margin-bottom: 8px;
 }
 
 .form-group:last-child {
@@ -223,11 +223,11 @@
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 6px;
 }
 
 .form-label {
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--text-secondary);
   font-weight: 600;
 }
@@ -236,9 +236,9 @@
   background-color: var(--bg-primary);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 6px 10px;
+  padding: 5px 8px;
   color: var(--text-primary);
-  font-size: 12.5px;
+  font-size: 12px;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   width: 100%;
@@ -252,18 +252,18 @@
 .checkbox-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  gap: 6px;
+  font-size: 11.5px;
   color: var(--text-secondary);
   cursor: pointer;
-  margin-top: 6px;
+  margin-top: 4px;
   user-select: none;
 }
 
 .checkbox-row input[type="checkbox"] {
   accent-color: var(--accent-primary);
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
   cursor: pointer;
 }
 
@@ -271,15 +271,15 @@
 .template-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .template-card {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
+  gap: 3px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
   background-color: var(--bg-primary);
   border: 1px solid var(--border-subtle);
   text-align: left;
@@ -307,12 +307,12 @@
 }
 
 .template-card-title {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--text-primary);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .template-card-title .icon {
@@ -324,9 +324,9 @@
 }
 
 .template-badge {
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
-  padding: 2px 7px;
+  padding: 2px 6px;
   border-radius: 99px;
   text-transform: uppercase;
   font-family: var(--font-mono);
@@ -349,7 +349,7 @@
 }
 
 .template-card-meta {
-  font-size: 11.5px;
+  font-size: 11px;
   color: var(--text-secondary);
   display: flex;
   align-items: center;
@@ -358,7 +358,7 @@
 
 .template-card-path {
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 10px;
   color: var(--text-muted);
 }
 
@@ -366,20 +366,20 @@
 .snippet-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  gap: 5px;
 }
 
 .snippet-btn {
-  padding: 7px 9px;
+  padding: 5px 8px;
   border-radius: var(--radius-sm);
   background-color: var(--bg-primary);
   border: 1px solid var(--border-subtle);
-  font-size: 11.5px;
+  font-size: 11px;
   color: var(--text-secondary);
   text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   transition: all 0.15s ease;
   box-shadow: var(--shadow-sm);
 }
@@ -393,26 +393,26 @@
 .snippet-label-row {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .snippet-cmd {
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 600;
   color: var(--accent-primary);
 }
 
 /* Code Editor */
 .line-numbers {
-  width: 46px;
-  padding: 14px 8px 14px 4px;
+  width: 40px;
+  padding: 10px 6px 10px 4px;
   text-align: right;
   font-family: var(--font-mono);
-  font-size: 13px;
-  line-height: 20px;
+  font-size: 12.5px;
+  line-height: 19px;
   color: var(--text-muted);
   background-color: var(--bg-secondary);
   border-right: 1px solid var(--border-subtle);
@@ -422,8 +422,8 @@
 }
 
 .line-numbers div {
-  height: 20px;
-  padding-right: 4px;
+  height: 19px;
+  padding-right: 3px;
 }
 
 .line-numbers div.active-line {
@@ -436,15 +436,15 @@
 .code-textarea {
   flex: 1;
   height: 100%;
-  padding: 14px 16px;
+  padding: 10px 12px;
   background-color: var(--bg-primary);
   border: none;
   outline: none;
   resize: none;
   color: var(--text-primary);
   font-family: var(--font-mono);
-  font-size: 13px;
-  line-height: 20px;
+  font-size: 12.5px;
+  line-height: 19px;
   tab-size: 2;
   white-space: pre;
   overflow: auto;
@@ -479,21 +479,21 @@
 /* Element Inspector Tooltip */
 .inspector-floating {
   position: absolute;
-  bottom: 14px;
-  left: 14px;
-  right: 14px;
+  bottom: 8px;
+  left: 10px;
+  right: 10px;
   background-color: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(8px);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   pointer-events: none;
-  box-shadow: var(--shadow-md);
-  font-size: 12px;
+  box-shadow: var(--shadow-sm);
+  font-size: 11px;
   z-index: 6;
 }
 
