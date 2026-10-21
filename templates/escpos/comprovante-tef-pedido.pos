@@ -1,0 +1,51 @@
+; Template ESC/POS (COM/POS) - Comprovante TEF & Pedido (Bobina 58mm)
+ESC @
+WIDTH 58
+
+ESC a 1
+GS B 1
+GS ! 17
+ EXPRESSO CAFE & BISTRO 
+GS ! 0
+GS B 0
+CNPJ: 22.333.444/0001-55
+--------------------------------
+ESC E 1
+COMPROVANTE DE CARTAO - TEF
+VIA DO CLIENTE
+ESC E 0
+--------------------------------
+ESC a 0
+<LR>TERMINAL: POS-0942|DOC: 849201
+<LR>DATA: 21/10/2026|HORA: 10:45
+<LR>BANDEIRA: VISA|CREDITO A VISTA
+<LR>CARTAO:|**** **** **** 4092
+<LR>AUT: 994821|NSU: 00482910
+--------------------------------
+ESC E 1
+GS ! 16
+<LR>VALOR APROVADO|R$ 48,50
+GS ! 0
+ESC E 0
+================================
+ESC a 1
+ESC E 1
+GS ! 17
+SENHA DE RETIRADA: #084
+GS ! 0
+ESC E 0
+--------------------------------
+ESC a 0
+2x CAPPUCCINO ITALIANO G
+1x PAO DE QUEIJO RECHEADO
+1x TORTA HOLANDESA FATIA
+--------------------------------
+ESC a 1
+GS h 64
+GS w 2
+GS H 2
+BARCODE CODE128 "PED-084-2026"
+ESC M 1
+Obrigado pela preferencia! Volte sempre.
+ESC M 0
+GS V 66

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zebra Studio — Visualizador de Templates EPL2 &amp; ZPL II</title>
+  <title>Zebra Studio — Visualizador de Templates EPL2, ZPL II &amp; ESC/POS Fiscal</title>
   <!-- Fonte Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -33,11 +33,11 @@
             Zebra Label Studio
             <span class="template-badge zpl">100% Offline Canvas</span>
           </div>
-          <div class="brand-subtitle">Visualizador e Interpretador de Etiquetas Térmicas EPL2 &amp; ZPL II</div>
+          <div class="brand-subtitle">Visualizador e Interpretador de Etiquetas e Cupons Fiscais EPL2, ZPL II &amp; ESC/POS</div>
         </div>
       </div>
 
-      <!-- Seletor de Linguagem (ZPL / EPL) -->
+      <!-- Seletor de Linguagem (ZPL / EPL / ESC-POS) -->
       <div class="header-controls">
         <div class="lang-switcher" role="tablist" aria-label="Linguagem da Impressora">
           <button type="button" class="lang-tab active" data-lang="zpl" role="tab">
@@ -47,6 +47,10 @@
           <button type="button" class="lang-tab" data-lang="epl" role="tab">
             <span class="lang-dot"></span>
             EPL2 (Eltron)
+          </button>
+          <button type="button" class="lang-tab" data-lang="escpos" role="tab">
+            <span class="lang-dot"></span>
+            ESC/POS (Fiscal)
           </button>
         </div>
 
@@ -62,9 +66,9 @@
             <polyline points="17 8 12 3 7 8"/>
             <line x1="12" y1="3" x2="12" y2="15"/>
           </svg>
-          <span>Abrir Arquivo (.zpl / .epl)</span>
+          <span>Abrir Arquivo (.zpl / .epl / .pos)</span>
         </button>
-        <input type="file" id="fileInput" accept=".zpl,.epl,.prn,.txt" hidden />
+        <input type="file" id="fileInput" accept=".zpl,.epl,.pos,.prn,.txt" hidden />
         <button type="button" id="exportPngBtn" class="btn btn-primary">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -115,6 +119,8 @@
               <option value="100x150">100 x 150 mm (4" x 6" - Expedição/DANFE)</option>
               <option value="60x40">60 x 40 mm (Gôndola / Patrimônio)</option>
               <option value="50x25">50 x 25 mm (Etiqueta Pequena)</option>
+              <option value="80x210">80 x 210 mm (Bobina Fiscal 80mm - NFC-e/SAT)</option>
+              <option value="58x150">58 x 150 mm (Bobina Fiscal 58mm - TEF/POS)</option>
               <option value="custom">Personalizado</option>
             </select>
           </div>
@@ -141,7 +147,7 @@
 
           <label class="checkbox-row">
             <input type="checkbox" id="autoSizeCheck" checked />
-            <span>Ajustar tamanho via código (<code>^PW/^LL</code> ou <code>q/Q</code>)</span>
+            <span>Ajustar tamanho via código (<code>^PW/^LL</code>, <code>q/Q</code> ou <code>WIDTH</code>)</span>
           </label>
         </section>
 
@@ -360,7 +366,7 @@
           <svg class="icon" style="color: var(--accent-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
           </svg>
-          Guia Rápido de Comandos — ZPL II &amp; EPL2
+          Guia Rápido de Comandos — ZPL II, EPL2 &amp; ESC/POS (COM/POS Fiscal)
         </h3>
         <button type="button" id="closeRefModalBtn" class="btn btn-ghost btn-sm">
           <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -411,6 +417,27 @@
             </tbody>
           </table>
         </div>
+        <div>
+          <h4 style="color: var(--accent-escpos); margin-bottom: 6px;">ESC/POS (COM/POS Fiscal)</h4>
+          <table class="ref-table">
+            <thead>
+              <tr><th>Comando</th><th>Descrição</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>ESC @</code> / <code>WIDTH 80</code></td><td>Inicializa impressora / Define bobina (80mm ou 58mm)</td></tr>
+              <tr><td><code>ESC a 0|1|2</code></td><td>Alinhamento: <code>0</code>=Esquerda, <code>1</code>=Centro, <code>2</code>=Direita</td></tr>
+              <tr><td><code>ESC E 1</code> / <code>ESC E 0</code></td><td>Ativa / desativa texto em negrito (enfatizado)</td></tr>
+              <tr><td><code>ESC - 1</code> / <code>ESC - 0</code></td><td>Ativa / desativa modo sublinhado</td></tr>
+              <tr><td><code>GS ! 17</code> / <code>GS ! 0</code></td><td>Texto expandido (dupla altura/largura) / Normal</td></tr>
+              <tr><td><code>ESC M 1</code> / <code>ESC M 0</code></td><td>Fonte B condensada (menor) / Fonte A padrão</td></tr>
+              <tr><td><code>GS B 1</code> / <code>GS B 0</code></td><td>Impressão reversa (fundo preto, texto branco)</td></tr>
+              <tr><td><code>&lt;LR&gt;Esq|Dir</code></td><td>Alinha texto à esquerda e valor à direita na bobina</td></tr>
+              <tr><td><code>BARCODE CODE128 "x"</code></td><td>Imprime código de barras 1D (<code>GS h</code>, <code>GS w</code>, <code>GS H</code>)</td></tr>
+              <tr><td><code>QRCODE 5 "dados"</code></td><td>QR Code Fiscal SEFAZ NFC-e / SAT / PIX (<code>GS ( k</code>)</td></tr>
+              <tr><td><code>GS V 66</code></td><td>Aciona guilhotina (corte parcial/total do cupom)</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -419,9 +446,11 @@
   <script src="js/barcode/barcodeRenderer.js"></script>
   <script src="js/parsers/eplParser.js"></script>
   <script src="js/parsers/zplParser.js"></script>
+  <script src="js/parsers/escposParser.js"></script>
   <script src="js/renderer/canvasRenderer.js"></script>
   <script src="js/templates/eplTemplates.js"></script>
   <script src="js/templates/zplTemplates.js"></script>
+  <script src="js/templates/escposTemplates.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

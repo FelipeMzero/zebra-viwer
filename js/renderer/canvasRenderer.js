@@ -1,6 +1,6 @@
 /**
- * Zebra Studio - HTML5 Canvas Label Renderer
- * Renders normalized EPL2 / ZPL II elements with pixel/dot accuracy,
+ * Zebra Studio - HTML5 Canvas Label & Receipt Renderer
+ * Renders normalized EPL2 / ZPL II / ESC/POS elements with pixel/dot accuracy,
  * bounding-box calculation for interactive inspection, and grid overlay.
  */
 (function (global) {
@@ -71,8 +71,9 @@
     const ctx = canvas.getContext('2d');
     ctx.save();
 
-    // 1. Clean White Thermal Paper Background
-    ctx.fillStyle = '#ffffff';
+    // 1. Clean White Thermal Paper Background (subtle warm receipt tint for ESC/POS)
+    const isEscPos = parsed && parsed.language === 'escpos';
+    ctx.fillStyle = isEscPos ? '#fffef9' : '#ffffff';
     ctx.fillRect(0, 0, w, h);
 
     // 2. Render each element in sequence and compute its bounding box
@@ -145,6 +146,85 @@
           width: Math.max(8, Math.abs(el.x2 - el.x)),
           height: Math.max(8, Math.abs(el.y2 - el.y))
         };
+      } else if (el.type === 'sep_line') {
+        // ESC/POS Dashed or Double Separator Line
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        ctx.moveTo(el.x, el.y + 1);
+        ctx.lineTo(el.x + el.width, el.y + 1);
+        ctx.stroke();
+        if (el.double) {
+          ctx.beginPath();
+          ctx.moveTo(el.x, el.y + 5);
+          ctx.lineTo(el.x + el.width, el.y + 5);
+          ctx.stroke();
+        }
+        el.bbox = { x: el.x, y: el.y - 2, width: el.width, height: (el.double ? 8 : 6) };
+      } else if (el.type === 'cut') {
+        // ESC/POS Guillotine Paper Cut Indicator
+        const midY = el.y + 10;
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([8, 6]);
+        ctx.beginPath();
+        ctx.moveTo(0, midY);
+        ctx.lineTo(w, midY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const badgeText = '✂ CORTE DE PAPEL (GS V)';
+        ctx.font = 'bold 11px "JetBrains Mono", "Consolas", monospace';
+        const tw = ctx.measureText(badgeText).width + 16;
+        const bx = (w - tw) / 2;
+        ctx.fillStyle = '#f1f5f9';
+        ctx.fillRect(bx, midY - 9, tw, 18);
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.strokeRect(bx, midY - 9, tw, 18);
+        ctx.fillStyle = '#64748b';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(badgeText, w / 2, midY);
+        el.bbox = { x: 0, y: el.y, width: w, height: 22 };
+      } else if (el.type === 'text_lr') {
+        // ESC/POS Left | Right aligned columns
+        const fH = Math.max(8, el.fontHeight || 20);
+        const weight = el.bold ? '700' : '500';
+        ctx.font = `${weight} ${fH}px "JetBrains Mono", "Consolas", "Courier New", monospace`;
+        ctx.textBaseline = 'top';
+
+        if (el.reverse) {
+          ctx.fillStyle = '#000000';
+          ctx.fillRect(el.x - 4, el.y - 2, el.width + 8, fH + 4);
+          ctx.fillStyle = '#ffffff';
+        } else {
+          ctx.fillStyle = '#000000';
+        }
+
+        ctx.textAlign = 'left';
+        ctx.fillText(el.leftText || '', el.x, el.y);
+        ctx.textAlign = 'right';
+        ctx.fillText(el.rightText || '', el.x + el.width, el.y);
+
+        // Draw subtle leader dots between left and right if space permits
+        const lw = ctx.measureText(el.leftText || '').width;
+        const rw = ctx.measureText(el.rightText || '').width;
+        const dotStart = el.x + lw + 8;
+        const dotEnd = el.x + el.width - rw - 8;
+        if (dotEnd - dotStart > 24 && !el.reverse) {
+          ctx.save();
+          ctx.strokeStyle = 'rgba(100, 116, 139, 0.35)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([2, 4]);
+          ctx.beginPath();
+          ctx.moveTo(dotStart, el.y + fH - 4);
+          ctx.lineTo(dotEnd, el.y + fH - 4);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        el.bbox = { x: el.x, y: el.y, width: el.width, height: fH };
       } else if (el.type === 'gf') {
         ctx.fillStyle = '#000000';
         let hexIdx = 0;
@@ -163,32 +243,48 @@
       } else if (el.type === 'text') {
         const fH = Math.max(8, el.fontHeight || 24);
         const fW = Math.max(6, el.fontWidth || fH);
-        const isMono = el.eplStyle || (el.fontId && el.fontId !== '0');
+        const isMono = el.eplStyle || el.escposStyle || (el.fontId && el.fontId !== '0');
         const fontFamily = isMono
           ? '"JetBrains Mono", "Consolas", "Courier New", monospace'
           : '"Arial Narrow", "Roboto Condensed", "Inter", "Arial", sans-serif';
 
-        ctx.font = `bold ${fH}px ${fontFamily}`;
+        const fontWeight = el.escposStyle ? (el.bold ? '800' : '500') : 'bold';
+        ctx.font = `${fontWeight} ${fH}px ${fontFamily}`;
         ctx.textBaseline = 'top';
 
-        // Horizontal stretch ratio to emulate Zebra independent width/height scaling
+        // Horizontal stretch ratio
         const naturalCharW = fH * (isMono ? 0.6 : 0.55);
         const targetCharW = el.eplStyle ? fW : fW * 0.62;
-        const scaleX = Math.max(0.45, Math.min(3.0, targetCharW / naturalCharW));
-
-        ctx.translate(el.x, el.y);
-        if (el.rotation === 90) ctx.rotate(Math.PI / 2);
-        else if (el.rotation === 180) ctx.rotate(Math.PI);
-        else if (el.rotation === 270) ctx.rotate((3 * Math.PI) / 2);
+        const scaleX = el.escposStyle
+          ? Math.max(0.75, Math.min(2.2, fW / (fH * 0.6)))
+          : Math.max(0.45, Math.min(3.0, targetCharW / naturalCharW));
 
         const measuredRaw = ctx.measureText(el.text || '').width;
         const totalW = measuredRaw * scaleX;
         let totalH = fH;
 
-        if (el.eplStyle && el.reverse) {
-          // EPL Reverse ('R'): black background bar with white text
+        let drawOriginX = el.x;
+        if (el.containerWidth && el.align) {
+          if (el.align === 'center') {
+            drawOriginX = el.x + Math.max(0, (el.containerWidth - totalW) / 2);
+          } else if (el.align === 'right') {
+            drawOriginX = el.x + Math.max(0, el.containerWidth - totalW);
+          }
+        }
+
+        ctx.translate(drawOriginX, el.y);
+        if (el.rotation === 90) ctx.rotate(Math.PI / 2);
+        else if (el.rotation === 180) ctx.rotate(Math.PI);
+        else if (el.rotation === 270) ctx.rotate((3 * Math.PI) / 2);
+
+        if ((el.eplStyle || el.escposStyle) && el.reverse) {
+          // EPL / ESC/POS Reverse: black background bar with white text
           ctx.fillStyle = '#000000';
-          ctx.fillRect(-4, -3, totalW + 8, fH + 6);
+          if (el.escposStyle && el.containerWidth && el.align === 'center') {
+            ctx.fillRect(-(drawOriginX - el.x), -3, el.containerWidth, fH + 6);
+          } else {
+            ctx.fillRect(-4, -3, totalW + 8, fH + 6);
+          }
           ctx.fillStyle = '#ffffff';
         } else if (el.reverse) {
           // ZPL ^FR: invert pixels against underlying canvas
@@ -218,16 +314,22 @@
           ctx.scale(scaleX, 1);
           ctx.fillText(el.text || '', 0, 0);
 
+          if (el.underline) {
+            ctx.fillRect(0, fH - 2, measuredRaw, 2);
+          }
+
           if (el.rotation === 90 || el.rotation === 270) {
-            el.bbox = { x: el.x - totalH, y: el.y, width: totalH, height: totalW };
+            el.bbox = { x: drawOriginX - totalH, y: el.y, width: totalH, height: totalW };
           } else {
-            el.bbox = { x: el.x, y: el.y, width: Math.max(20, totalW), height: totalH };
+            el.bbox = { x: drawOriginX, y: el.y, width: Math.max(20, totalW), height: totalH };
           }
         }
       } else if (el.type === 'barcode') {
         const dim = global.BarcodeRenderer.draw1DBarcode(ctx, {
           x: el.x,
           y: el.y,
+          align: el.align,
+          containerWidth: el.containerWidth,
           type: el.barcodeType,
           data: el.data,
           moduleWidth: el.moduleWidth,
@@ -237,15 +339,27 @@
           textAbove: el.textAbove,
           rotation: el.rotation
         });
-        el.bbox = { x: el.x, y: el.y, width: dim.width || 120, height: dim.height || el.height };
+        el.bbox = {
+          x: dim.x !== undefined ? dim.x : el.x,
+          y: el.y,
+          width: dim.width || 120,
+          height: dim.height || el.height
+        };
       } else if (el.type === 'qrcode') {
         const dim = global.BarcodeRenderer.drawQRCode(ctx, {
           x: el.x,
           y: el.y,
+          align: el.align,
+          containerWidth: el.containerWidth,
           data: el.data,
           magnification: el.magnification
         });
-        el.bbox = { x: el.x, y: el.y, width: dim.width, height: dim.height };
+        el.bbox = {
+          x: dim.x !== undefined ? dim.x : el.x,
+          y: el.y,
+          width: dim.width,
+          height: dim.height
+        };
       }
 
       ctx.restore();
@@ -262,7 +376,7 @@
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, h);
-        ctx.strokeStyle = isMajor ? 'rgba(56, 189, 248, 0.28)' : 'rgba(148, 163, 184, 0.15)';
+        ctx.strokeStyle = isMajor ? 'rgba(2, 132, 199, 0.28)' : 'rgba(148, 163, 184, 0.18)';
         ctx.lineWidth = 1;
         ctx.stroke();
       }
@@ -272,7 +386,7 @@
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(w, y);
-        ctx.strokeStyle = isMajor ? 'rgba(56, 189, 248, 0.28)' : 'rgba(148, 163, 184, 0.15)';
+        ctx.strokeStyle = isMajor ? 'rgba(2, 132, 199, 0.28)' : 'rgba(148, 163, 184, 0.18)';
         ctx.lineWidth = 1;
         ctx.stroke();
       }
@@ -284,8 +398,8 @@
     if (activeTarget && activeTarget.bbox) {
       const b = activeTarget.bbox;
       ctx.save();
-      ctx.fillStyle = 'rgba(245, 158, 11, 0.16)';
-      ctx.strokeStyle = '#f59e0b';
+      ctx.fillStyle = 'rgba(234, 88, 12, 0.14)';
+      ctx.strokeStyle = '#ea580c';
       ctx.lineWidth = 2;
       ctx.setLineDash([5, 3]);
       ctx.fillRect(b.x - 3, b.y - 3, b.width + 6, b.height + 6);

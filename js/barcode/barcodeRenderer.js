@@ -231,8 +231,17 @@
     const textGap = showText ? fontSize + 6 : 0;
     const totalHeight = height + textGap;
 
+    let drawX = x;
+    if (options.containerWidth && options.align) {
+      if (options.align === 'center') {
+        drawX = x + Math.max(0, Math.round((options.containerWidth - totalBarWidth) / 2));
+      } else if (options.align === 'right') {
+        drawX = x + Math.max(0, options.containerWidth - totalBarWidth);
+      }
+    }
+
     ctx.save();
-    ctx.translate(x, y);
+    ctx.translate(drawX, y);
     if (rotation === 90) {
       ctx.rotate(Math.PI / 2);
     } else if (rotation === 180) {
@@ -270,9 +279,9 @@
     ctx.restore();
 
     if (rotation === 90 || rotation === 270) {
-      return { width: totalHeight, height: totalBarWidth };
+      return { x: drawX, width: totalHeight, height: totalBarWidth };
     }
-    return { width: totalBarWidth, height: totalHeight };
+    return { x: drawX, width: totalBarWidth, height: totalHeight };
   }
 
   /**
@@ -505,27 +514,36 @@
    * Draw QR Code on Canvas
    */
   function drawQRCode(ctx, options) {
-    const { x = 0, y = 0, data = '', magnification = 4 } = options;
+    const { x = 0, y = 0, data = '', magnification = 4, align = 'left', containerWidth = 0 } = options;
     const mag = Math.max(2, Math.min(12, Math.round(magnification || 4)));
     const matrix = generateQRMatrix(data);
     const count = matrix.length;
     const totalSize = count * mag;
 
+    let drawX = x;
+    if (containerWidth && align) {
+      if (align === 'center') {
+        drawX = x + Math.max(0, Math.round((containerWidth - totalSize) / 2));
+      } else if (align === 'right') {
+        drawX = x + Math.max(0, containerWidth - totalSize);
+      }
+    }
+
     ctx.save();
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(x - mag, y - mag, totalSize + mag * 2, totalSize + mag * 2);
+    ctx.fillRect(drawX - mag, y - mag, totalSize + mag * 2, totalSize + mag * 2);
 
     ctx.fillStyle = '#000000';
     for (let r = 0; r < count; r++) {
       for (let c = 0; c < count; c++) {
         if (matrix[r][c]) {
-          ctx.fillRect(x + c * mag, y + r * mag, mag, mag);
+          ctx.fillRect(drawX + c * mag, y + r * mag, mag, mag);
         }
       }
     }
     ctx.restore();
 
-    return { width: totalSize, height: totalSize };
+    return { x: drawX, width: totalSize, height: totalSize };
   }
 
   global.BarcodeRenderer = {

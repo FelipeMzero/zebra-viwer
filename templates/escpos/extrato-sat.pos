@@ -1,0 +1,56 @@
+; Template ESC/POS (COM/POS) - Extrato CF-e SAT Fiscal (Bobina 80mm)
+ESC @
+WIDTH 80
+
+ESC a 1
+ESC E 1
+DROGARIA & FARMACIA SAUDE TOTAL S.A.
+ESC E 0
+RUA XV DE NOVEMBRO, 890 - CENTRO - CAMPINAS/SP
+CNPJ: 45.678.901/0001-23   IE: 244.556.778.110
+================================================
+ESC E 1
+EXTRATO No. 084920
+CUPOM FISCAL ELETRONICO - SAT
+ESC E 0
+================================================
+ESC a 0
+CPF/CNPJ do Consumidor: 321.654.987-00
+------------------------------------------------
+# | COD | DESC | QTD | UN | VL UNIT R$ | (VL TR R$) | VL ITEM R$
+------------------------------------------------
+001 7896523201 VITAMINA C 1G EFERV 30CP 1 UN X 34,90 (4,20)   34,90
+002 7891058004 PROTETOR SOLAR FPS60 200M 1 UN X 69,90 (9,10)  69,90
+003 7898142900 SORO FISIOLOGICO 500ML   2 UN X  8,50 (1,90)   17,00
+------------------------------------------------
+<LR>Subtotal bruto de itens|121,80
+<LR>Total de descontos/acrescimos|-1,80
+ESC E 1
+GS ! 16
+<LR>TOTAL R$|120,00
+GS ! 0
+ESC E 0
+<LR>Cartao de Credito (Mastercard)|120,00
+------------------------------------------------
+OBSERVACOES DO CONTRIBUINTE
+ Trib aprox R$ 15,20 Federal e R$ 11,40 Estadual (Fonte: IBPT)
+ Caixa: PDV-03   Operador: MARCOS SILVA
+================================================
+ESC a 1
+ESC E 1
+SAT No. 000.912.485
+ESC E 0
+21/10/2026 - 10:44:05
+3526 1045 6789 0100 0123 5900 0912 4850 8492 0991 2834
+
+GS h 70
+GS w 2
+GS H 0
+BARCODE CODE128 "35261045678901000123590009124850849209912834"
+
+QRCODE 5 "35261045678901000123590009124850849209912834|20261021104405|120.00|32165498700|ASSINATURA_SAT_QRCODE"
+
+ESC M 1
+Consulte o QR Code pelo aplicativo De Olho na Nota (SEFAZ)
+ESC M 0
+GS V 66

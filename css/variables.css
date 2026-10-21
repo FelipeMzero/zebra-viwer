@@ -14,6 +14,8 @@
   --accent-zpl-soft: rgba(2, 132, 199, 0.10);
   --accent-epl: #059669;
   --accent-epl-soft: rgba(5, 150, 105, 0.10);
+  --accent-escpos: #7c3aed;
+  --accent-escpos-soft: rgba(124, 58, 237, 0.10);
 
   /* Text */
   --text-primary: #0f172a;

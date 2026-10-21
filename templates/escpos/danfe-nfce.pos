@@ -1,0 +1,78 @@
+; Template ESC/POS (COM/POS) - DANFE NFC-e Cupom Fiscal (Bobina 80mm)
+ESC @
+WIDTH 80
+
+; Cabecalho do Emitente
+ESC a 1
+ESC E 1
+GS ! 17
+SUPERMERCADO CENTRAL LTDA
+GS ! 0
+ESC E 0
+CNPJ: 12.345.678/0001-90   IE: 110.220.330.440
+AV. PAULISTA, 1500 - BELA VISTA - SAO PAULO/SP
+================================================
+ESC E 1
+DANFE NFC-e - Documento Auxiliar da Nota Fiscal
+de Consumidor Eletronica
+ESC E 0
+Nao permite aproveitamento de credito de ICMS
+================================================
+
+; Cabecalho da Tabela de Itens
+ESC a 0
+ESC E 1
+#  CODIGO      DESCRICAO             QTD UN   VL.UNIT   VL.TOTAL
+ESC E 0
+------------------------------------------------
+01 7891000105  CAFE TORRADO 500G     2 UN     18,90      37,80
+02 7894900011  LEITE INTEGRAL 1L     6 UN      5,49      32,94
+03 7891910000  ARROZ TIPO 1 5KG      1 UN     29,90      29,90
+04 7896005800  AZEITE EXTRA VIRGEM   1 UN     44,50      44,50
+------------------------------------------------
+
+; Totais do Cupom
+<LR>QTD. TOTAL DE ITENS|04
+<LR>SUBTOTAL R$|145,14
+<LR>DESCONTO R$|5,14
+ESC E 1
+GS ! 16
+<LR>VALOR A PAGAR R$|140,00
+GS ! 0
+ESC E 0
+------------------------------------------------
+<LR>FORMA DE PAGAMENTO|VALOR PAGO R$
+<LR>PIX / QR CODE INSTANTANEO|140,00
+<LR>TROCO R$|0,00
+------------------------------------------------
+
+; Informacoes da Chave de Acesso e Consumidor
+ESC a 1
+ESC E 1
+Consulte pela Chave de Acesso em:
+ESC E 0
+https://www.nfce.fazenda.sp.gov.br/consulta
+3526 1012 3456 7800 0190 6500 1000 0482 9110 0849 2018
+
+; Codigo de Barras da Série/Número NFC-e
+GS h 64
+GS w 2
+GS H 0
+BARCODE CODE128 "3526101234567800019065001000048291"
+
+------------------------------------------------
+CONSUMIDOR CPF: 123.456.789-00 - CLIENTE IDENTIFICADO
+NFC-e nº 000.048.291   Série 001   21/10/2026 10:42:18
+Protocolo de Autorização: 135260948291042
+------------------------------------------------
+ESC E 1
+Consulta via leitor de QR Code
+ESC E 0
+QRCODE 5 "https://www.nfce.fazenda.sp.gov.br/qrcode?p=35261012345678000190650010000482911008492018|2|1|1|A8F9B2"
+
+ESC M 1
+Tributos Totais Incidentes (Lei Federal 12.741/2012): R$ 24,85 (17,75%)
+Fed: R$ 11,20 (8,00%) | Est: R$ 13,65 (9,75%) | Fonte: IBPT
+ESC M 0
+ESC d 1
+GS V 66

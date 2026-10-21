@@ -62,14 +62,29 @@
     statusCursor: document.getElementById('statusCursor')
   };
 
+  function getRegistry(lang) {
+    if (lang === 'epl') return window.EPLTemplates;
+    if (lang === 'escpos') return window.ESCPOSTemplates;
+    return window.ZPLTemplates;
+  }
+
+  function getLangBadgeText(lang) {
+    if (lang === 'epl') return 'EPL2 (.epl)';
+    if (lang === 'escpos') return 'ESC/POS (.pos)';
+    return 'ZPL II (.zpl)';
+  }
+
   /**
-   * Auto-detect whether pasted/typed code is ZPL or EPL
+   * Auto-detect whether pasted/typed code is ZPL, EPL, or ESC/POS
    */
   function detectLanguage(code) {
     const src = String(code || '').trim();
     if (!src) return state.language;
     if (/\^(XA|FO|FT|FD|GB|BC|BY|PW|LL)/i.test(src)) {
       return 'zpl';
+    }
+    if (/^(ESC\s+[@aEMd\-!]|GS\s+[!BVhwHk]|WIDTH\s+\d+|<LR>|BARCODE\s+|QRCODE\s+)/im.test(src) || /\\x1[bBdD]/.test(src)) {
+      return 'escpos';
     }
     if (/^(N|q\d+|Q\d+|A\d+,\d+|B\d+,\d+|LO\d+|X\d+)/m.test(src)) {
       return 'epl';
@@ -78,7 +93,7 @@
   }
 
   /**
-   * Switch active language ('zpl' or 'epl')
+   * Switch active language ('zpl' | 'epl' | 'escpos')
    */
   function setLanguage(lang, loadDefaultTemplate = false) {
     state.language = lang;
@@ -86,16 +101,16 @@
       tab.classList.toggle('active', tab.dataset.lang === lang);
     });
 
-    els.editorLangBadge.textContent = lang === 'zpl' ? 'ZPL II (.zpl)' : 'EPL2 (.epl)';
+    els.editorLangBadge.textContent = getLangBadgeText(lang);
     els.editorLangBadge.className = `template-badge ${lang}`;
-    els.statusLang.textContent = `Linguagem: ${lang.toUpperCase()}`;
+    els.statusLang.textContent = `Linguagem: ${lang === 'escpos' ? 'ESC/POS' : lang.toUpperCase()}`;
 
     renderSidebarTemplates();
     renderSidebarSnippets();
 
     if (loadDefaultTemplate) {
-      const registry = lang === 'zpl' ? window.ZPLTemplates : window.EPLTemplates;
-      if (registry.list.length > 0) {
+      const registry = getRegistry(lang);
+      if (registry && registry.list.length > 0) {
         selectTemplate(registry.list[0]);
       }
     } else {
@@ -107,7 +122,7 @@
    * Populate Sidebar Templates for current language
    */
   function renderSidebarTemplates() {
-    const registry = state.language === 'zpl' ? window.ZPLTemplates : window.EPLTemplates;
+    const registry = getRegistry(state.language);
     els.templateList.innerHTML = '';
 
     registry.list.forEach((tpl) => {
@@ -125,7 +140,7 @@
             </svg>
             <span>${tpl.name}</span>
           </span>
-          <span class="template-badge ${tpl.language}">${tpl.language.toUpperCase()}</span>
+          <span class="template-badge ${tpl.language}">${tpl.language === 'escpos' ? 'ESC/POS' : tpl.language.toUpperCase()}</span>
         </div>
         <div class="template-card-meta">
           <span>${tpl.sizeMm}</span>
@@ -141,7 +156,7 @@
    * Populate Quick Command Snippets for current language
    */
   function renderSidebarSnippets() {
-    const registry = state.language === 'zpl' ? window.ZPLTemplates : window.EPLTemplates;
+    const registry = getRegistry(state.language);
     els.snippetGrid.innerHTML = '';
 
     registry.snippets.forEach((snip) => {
@@ -157,7 +172,7 @@
           </svg>
           <span>${snip.label}</span>
         </span>
-        <span class="snippet-cmd">${snip.cmd.slice(0, 18)}...</span>
+        <span class="snippet-cmd">${snip.cmd.replace(/\n/g, ' ').slice(0, 18)}...</span>
       `;
       btn.addEventListener('click', () => insertSnippetAtCursor(snip.cmd));
       els.snippetGrid.appendChild(btn);
@@ -178,7 +193,7 @@
     els.dpiSelect.value = String(state.dpmm);
     syncPresetDropdown();
 
-    const registry = tpl.language === 'zpl' ? window.ZPLTemplates : window.EPLTemplates;
+    const registry = getRegistry(tpl.language);
     const code = await registry.loadCode(tpl);
     els.codeEditor.value = code;
 
@@ -233,17 +248,21 @@
       els.langTabs.forEach((tab) => {
         tab.classList.toggle('active', tab.dataset.lang === detected);
       });
-      els.editorLangBadge.textContent = detected === 'zpl' ? 'ZPL II (.zpl)' : 'EPL2 (.epl)';
+      els.editorLangBadge.textContent = getLangBadgeText(detected);
       els.editorLangBadge.className = `template-badge ${detected}`;
-      els.statusLang.textContent = `Linguagem: ${detected.toUpperCase()}`;
+      els.statusLang.textContent = `Linguagem: ${detected === 'escpos' ? 'ESC/POS' : detected.toUpperCase()}`;
       renderSidebarTemplates();
       renderSidebarSnippets();
     }
 
-    const parsed =
-      state.language === 'zpl'
-        ? window.ZPLParser.parse(code)
-        : window.EPLParser.parse(code);
+    let parsed;
+    if (state.language === 'zpl') {
+      parsed = window.ZPLParser.parse(code);
+    } else if (state.language === 'escpos') {
+      parsed = window.ESCPOSParser.parse(code);
+    } else {
+      parsed = window.EPLParser.parse(code);
+    }
 
     state.parsed = parsed;
 
@@ -522,17 +541,18 @@
       win.document.close();
     });
 
-    // Download source file (.zpl or .epl)
+    // Download source file (.zpl, .epl or .pos)
     els.downloadCodeBtn.addEventListener('click', () => {
+      const ext = state.language === 'escpos' ? 'pos' : state.language;
       const blob = new Blob([els.codeEditor.value], { type: 'text/plain;charset=utf-8' });
       const link = document.createElement('a');
-      link.download = `template.${state.language}`;
+      link.download = `template.${ext}`;
       link.href = URL.createObjectURL(blob);
       link.click();
       URL.revokeObjectURL(link.href);
     });
 
-    // Upload file (.zpl, .epl, .prn, .txt)
+    // Upload file (.zpl, .epl, .pos, .prn, .txt)
     els.uploadFileBtn.addEventListener('click', () => els.fileInput.click());
     els.fileInput.addEventListener('change', (e) => {
       const file = e.target.files && e.target.files[0];
@@ -553,6 +573,8 @@
     els.clearCodeBtn.addEventListener('click', () => {
       if (state.language === 'zpl') {
         els.codeEditor.value = `^XA\n^PW${state.widthMm * state.dpmm}\n^LL${state.heightMm * state.dpmm}\n^FO40,40^A0N,36,36^FDNOVA ETIQUETA ZPL^FS\n^XZ`;
+      } else if (state.language === 'escpos') {
+        els.codeEditor.value = `ESC @\nWIDTH 80\nESC a 1\nESC E 1\nGS ! 17\nNOVO CUPOM FISCAL\nGS ! 0\nESC E 0\n------------------------------------------------\nESC a 0\n<LR>01 PRODUTO EXEMPLO|R$ 10,00\n------------------------------------------------\nESC a 1\nQRCODE 5 "https://www.nfce.fazenda.sp.gov.br"\nGS V 66`;
       } else {
         els.codeEditor.value = `N\nq${state.widthMm * state.dpmm}\nQ${state.heightMm * state.dpmm},24\nA40,40,0,4,1,1,N,"NOVA ETIQUETA EPL"\nP1`;
       }
